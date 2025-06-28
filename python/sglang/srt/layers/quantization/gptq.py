@@ -17,17 +17,19 @@ _is_cuda = is_cuda()
 try:
     from vllm import _custom_ops as ops
     from vllm.model_executor.layers.quantization.gptq import GPTQLinearMethod
-    from vllm.model_executor.layers.quantization.gptq_marlin import (
-        FusedMoE,
-        FusedMoEMethodBase,
-        FusedMoeWeightScaleSupported,
-        GPTQMarlinLinearMethod,
-        marlin_moe_permute_scales,
-    )
-    from vllm.model_executor.layers.quantization.marlin import MarlinLinearMethod
-    from vllm.model_executor.layers.quantization.utils.marlin_utils import (
-        check_marlin_supported,
-    )
+from vllm.model_executor.layers.quantization.gptq_marlin import (
+    FusedMoE,
+    FusedMoEMethodBase,
+    FusedMoeWeightScaleSupported,
+    GPTQMarlinLinearMethod,
+)
+# helper utilities were moved here in vLLM PR #16850
+from vllm.model_executor.layers.quantization.utils.marlin_utils import (
+    check_marlin_supported,
+    marlin_moe_permute_scales,
+    marlin_make_workspace_new,
+)
+from vllm.model_executor.layers.quantization.marlin import MarlinLinearMethod
     from vllm.scalar_type import scalar_types
 
     VLLM_AVAILABLE = True
@@ -713,6 +715,9 @@ class GPTQMarlinMoEMethod(FusedMoEMethodBase):
             e_score_correction_bias=e_score_correction_bias,
         )
 
+        max_shmem = torch.cuda.get_device_properties(
+            layer.w13_qweight.device
+        ).shared_memory_per_block
         return torch.ops.vllm.fused_marlin_moe(
             x,
             layer.w13_qweight,
@@ -728,4 +733,5 @@ class GPTQMarlinMoEMethod(FusedMoEMethodBase):
             sort_indices2=layer.w2_g_idx_sort_indices,
             num_bits=self.quant_config.quant_type.size_bits,
             is_k_full=self.is_k_full,
+            max_shmem=max_shmem,
         ).to(orig_dtype)
