@@ -666,6 +666,9 @@ class CompressedTensorsWNA16MoEMethod(CompressedTensorsMoEMethod):
             routed_scaling_factor=routed_scaling_factor,
         )
 
+        max_shmem = torch.cuda.get_device_properties(
+            layer.w13_weight_packed.device
+        ).shared_memory_per_block
         return torch.ops.vllm.fused_marlin_moe(
             x,
             layer.w13_weight_packed,
@@ -681,4 +684,5 @@ class CompressedTensorsWNA16MoEMethod(CompressedTensorsMoEMethod):
             sort_indices2=layer.w2_g_idx_sort_indices,
             num_bits=self.num_bits,
             is_k_full=self.is_k_full,
+            max_shmem=max_shmem,
         )
