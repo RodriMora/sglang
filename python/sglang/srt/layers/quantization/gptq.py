@@ -17,19 +17,19 @@ _is_cuda = is_cuda()
 try:
     from vllm import _custom_ops as ops
     from vllm.model_executor.layers.quantization.gptq import GPTQLinearMethod
-from vllm.model_executor.layers.quantization.gptq_marlin import (
-    FusedMoE,
-    FusedMoEMethodBase,
-    FusedMoeWeightScaleSupported,
-    GPTQMarlinLinearMethod,
-)
-# helper utilities were moved here in vLLM PR #16850
-from vllm.model_executor.layers.quantization.utils.marlin_utils import (
-    check_marlin_supported,
-    marlin_moe_permute_scales,
-    marlin_make_workspace_new,
-)
-from vllm.model_executor.layers.quantization.marlin import MarlinLinearMethod
+    from vllm.model_executor.layers.quantization.gptq_marlin import (
+        FusedMoE,
+        FusedMoEMethodBase,
+        FusedMoeWeightScaleSupported,
+        GPTQMarlinLinearMethod,
+    )
+    # helper utilities were moved here in vLLM PR #16850
+    from vllm.model_executor.layers.quantization.utils.marlin_utils import (
+        check_marlin_supported,
+        marlin_moe_permute_scales,
+        marlin_make_workspace_new,
+    )
+    from vllm.model_executor.layers.quantization.marlin import MarlinLinearMethod
     from vllm.scalar_type import scalar_types
 
     VLLM_AVAILABLE = True
